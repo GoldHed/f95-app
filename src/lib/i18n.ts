@@ -37,7 +37,7 @@ export const LOCALES: LocaleMeta[] = [
 ];
 
 const DICTS: Record<Locale, Record<string, string>> = { en, pt, de, ru };
-const DEFAULT_LOCALE: Locale = 'pt';
+const DEFAULT_LOCALE: Locale = 'en';
 
 /**
  * Look up a key in `locale`, falling back to English, then to the key itself.
