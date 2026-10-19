@@ -1,6 +1,6 @@
 # Building this fork on Windows (step by step)
 
-You need to do steps 1–3 once. After that, step 5 is all you run to start the app.
+You need to do steps 1–3 once. After that, step 4 is all you run to start the app.
 
 ## 1. Install the tools
 
@@ -25,7 +25,7 @@ cargo --version
 
 ## 2. Get the code
 
-On GitHub, open https://github.com/jky-sh/f95-app and press **Fork** (top right). That makes your own copy, `github.com/<you>/f95-app`. Then:
+Your fork is at https://github.com/GoldHed/f95-app; the new features are on its `organized-library` branch:
 
 ```powershell
 cd $HOME\Documents
@@ -34,19 +34,7 @@ cd f95-app
 git checkout organized-library
 ```
 
-## 3. Apply the changes
-
-Copy `organized-library.patch` into the `f95-app` folder, then:
-
-```powershell
-git checkout -b organized-library
-git am organized-library.patch
-git push -u origin organized-library
-```
-
-(`git am` adds the changes as a commit; `git push` saves them to your fork on GitHub.)
-
-## 4. Install the JavaScript packages
+## 3. Install the JavaScript packages
 
 ```powershell
 npm install
@@ -60,7 +48,7 @@ The last two package the helper program the app runs alongside itself (they crea
 
 If PowerShell says "running scripts is disabled on this system", run `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` once, or use `npm.cmd` instead of `npm`.
 
-## 5. Run it
+## 4. Run it
 
 ```powershell
 npm run tauri dev
@@ -68,7 +56,7 @@ npm run tauri dev
 
 The first run compiles the Rust side and takes several minutes; later runs are quick. A window opens — log in with your F95Zone account.
 
-## 6. First-time setup in the app
+## 5. First-time setup in the app
 
 1. **Library → Import folders** → pick your external drive's games folder (e.g. `E:\Games`).
 2. Check each match, type the version you have (or press "I have vX" if you're up to date), keep "Move each game's files into a Current sub-folder" ticked, and press **Import**.
