@@ -31,6 +31,11 @@ export async function login(username: string, password: string): Promise<void> {
   await invoke<void>('login', { username, password });
 }
 
+/** Open F95Zone's own login page in a window (Cloudflare check, 2FA). */
+export async function openF95LoginWindow(): Promise<void> {
+  await invoke<void>('open_f95_login_window', { userAgent: navigator.userAgent });
+}
+
 export async function isLoggedIn(): Promise<boolean> {
   return invoke<boolean>('is_logged_in');
 }

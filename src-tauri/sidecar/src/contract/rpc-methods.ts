@@ -31,6 +31,10 @@ export const RPC_METHODS = {
     params: {},
     result: { loggedIn: 'boolean' },
   },
+  importBrowserSession: {
+    params: { cookies: 'unknown', userAgent: 'string' },
+    result: { ok: 'boolean' },
+  },
   samList: {
     params: { filters: 'SamFilters' },
     result: 'unknown',

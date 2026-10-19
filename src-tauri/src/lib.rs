@@ -222,6 +222,7 @@ pub fn run() {
             download_cancel,
             extract_archive,
             probe_install_dir,
+            commands::open_f95_login_window,
             commands::organize_install,
             commands::adopt_game_folder,
             commands::list_game_folders,

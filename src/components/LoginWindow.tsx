@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { getCurrentWindow } from '@tauri-apps/api/window';
+import { listen } from '@tauri-apps/api/event';
 import * as ipc from '../lib/ipc';
 import { probeOfflineQuick } from '../contexts/Offline';
 import { saveCredentials, clearCredentials, loadCredentials } from '../lib/stronghold';
@@ -110,6 +111,38 @@ export function LoginWindow() {
     };
   }, []);
 
+  // "Sign in on the F95Zone page": the browser window reports back here.
+  useEffect(() => {
+    const unlisteners = [
+      listen('f95-login:done', () => {
+        void completeLogin();
+      }),
+      listen<string>('f95-login:error', (e) => {
+        setError(e.payload);
+        setPhase({ kind: 'form' });
+      }),
+    ];
+    return () => {
+      for (const u of unlisteners) void u.then((fn) => fn());
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  async function openBrowserLogin() {
+    setError(null);
+    try {
+      await ipc.openF95LoginWindow();
+    } catch (err) {
+      setError(isBackendError(err) ? err : String(err));
+    }
+  }
+
+  const browserLoginButton = (
+    <button type="button" onClick={() => void openBrowserLogin()} style={browserLoginBtn}>
+      {t('login.browser')}
+    </button>
+  );
+
   async function completeLogin() {
     setPhase({ kind: 'completing' });
     try {
@@ -156,6 +189,7 @@ export function LoginWindow() {
                 ? t('login.autoLogin')
                 : t('auth.loading')}
             </span>
+            {browserLoginButton}
           </div>
         ) : phase.kind === 'completing' ? (
           <div style={loadingStyle}>
@@ -222,6 +256,8 @@ export function LoginWindow() {
                 {submitting ? t('login.submitting') : t('login.submit')}
               </button>
 
+              {browserLoginButton}
+              <div style={hintStyle}>{t('login.browser.hint')}</div>
               <div style={hintStyle}>{t('login.hint')}</div>
             </form>
           )
@@ -255,6 +291,18 @@ function MiniTitleBar() {
 
 
 // ── styles ──────────────────────────────────────────────────────────────
+
+const browserLoginBtn: React.CSSProperties = {
+  marginTop: 8,
+  padding: '8px 12px',
+  background: 'transparent',
+  border: '1px solid var(--border)',
+  borderRadius: 4,
+  color: 'var(--text-secondary)',
+  font: 'inherit',
+  fontSize: 13,
+  cursor: 'pointer',
+};
 
 const rootStyle: React.CSSProperties = {
   display: 'flex',

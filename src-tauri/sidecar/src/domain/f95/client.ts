@@ -316,6 +316,62 @@ export class F95Client {
   async close(): Promise<void> {
     await this.client.close();
   }
+
+  /**
+   * Adopt the session of a real browser that logged in on F95Zone's own
+   * page (Cloudflare check, 2FA and all): its cookies replace this
+   * client's, and its user agent is used from now on, since Cloudflare's
+   * clearance cookie only holds for the browser that earned it.
+   */
+  async importBrowserSession(
+    cookies: ImportedCookie[],
+    userAgent: string | null,
+  ): Promise<void> {
+    await this.client.close();
+    forgetCsrf();
+    const now = new Date().toISOString();
+    const data = {
+      id: this._sessionId,
+      createdAt: now,
+      lastUsed: now,
+      cookies: cookies.map((c) => toSerializedCookie(c, now)),
+      headers: userAgent ? { 'user-agent': userAgent } : {},
+    };
+    await fs.mkdir(this._sessionDir, { recursive: true });
+    const filePath = path.join(this._sessionDir, `${this._sessionId}.json`);
+    await fs.writeFile(`${filePath}.tmp`, JSON.stringify(data, null, 2), 'utf8');
+    await fs.rename(`${filePath}.tmp`, filePath);
+    this.client = this.createHttpClient();
+  }
+}
+
+export interface ImportedCookie {
+  name: string;
+  value: string;
+  domain: string;
+  path?: string | null;
+  /** Unix seconds; null for a session cookie. */
+  expires?: number | null;
+  secure?: boolean;
+  httpOnly?: boolean;
+}
+
+/** One cookie in tough-cookie's serialized form (what the session file holds). */
+export function toSerializedCookie(c: ImportedCookie, now: string): Record<string, unknown> {
+  const rawDomain = (c.domain || 'f95zone.to').trim().toLowerCase();
+  return {
+    key: c.name,
+    value: c.value,
+    domain: rawDomain.replace(/^\./, ''),
+    path: c.path || '/',
+    // A cookie set for ".f95zone.to" also goes to subdomains.
+    hostOnly: !rawDomain.startsWith('.'),
+    secure: c.secure ?? true,
+    httpOnly: c.httpOnly ?? false,
+    ...(c.expires ? { expires: new Date(c.expires * 1000).toISOString() } : {}),
+    creation: now,
+    lastAccessed: now,
+  };
 }
 
 interface NavbarInfo {
@@ -421,4 +477,4 @@ function extractUserIdFromAvatarClass(cls: string): string | null {
   const m = cls.match(/avatar-u(\d+)-/);
   return m ? m[1] : null;
 }
-
+

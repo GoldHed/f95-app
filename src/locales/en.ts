@@ -1112,6 +1112,9 @@ const en: Record<string, string> = {
 
   // ─── Auth gate ──────────────────────────────────────────────────────────
   'auth.loading': 'Loading session…',
+  'login.browser': 'Sign in on the F95Zone page',
+  'login.browser.hint':
+    'Use this if your account has two-step verification or sign-in hangs. A window with F95Zone\'s own login page opens; it closes by itself once you are in.',
   'auth.loginRequired': 'You need to sign in to use the app.',
   'auth.error.generic': 'Something went wrong.',
   'auth.error.dismiss': 'Dismiss',

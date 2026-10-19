@@ -106,6 +106,21 @@ impl SidecarClient {
             .await
     }
 
+    /// Adopt a browser's F95Zone session (cookies + user agent).
+    pub async fn import_browser_session(
+        &self,
+        cookies: Value,
+        user_agent: Option<&str>,
+    ) -> Result<(), AppError> {
+        self.inner
+            .call(
+                "importBrowserSession",
+                json!({ "cookies": cookies, "userAgent": user_agent }),
+            )
+            .await?;
+        Ok(())
+    }
+
     pub async fn is_logged_in(&self) -> Result<bool, AppError> {
         let value: Value = self.inner.call("isLoggedIn", json!({})).await?;
         let parsed: LoggedInResult = serde_json::from_value(value)?;
