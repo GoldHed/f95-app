@@ -46,6 +46,15 @@ npm --prefix src-tauri/sidecar run build:sea
 
 The last two package the helper program the app runs alongside itself (they create `src-tauri\sidecar\dist\`). Without them, `npm run tauri dev` stops with "resource path `sidecar\dist\…` doesn't exist".
 
+Then download the browser the app uses behind the scenes (it reads some F95Zone pages with it):
+
+```powershell
+cd src-tauri\sidecar
+$env:PLAYWRIGHT_BROWSERS_PATH = "$env:LOCALAPPDATA\f95-app\ms-playwright"
+npx playwright install chromium
+cd ..\..
+```
+
 If PowerShell says "running scripts is disabled on this system", run `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` once, or use `npm.cmd` instead of `npm`.
 
 ## 4. Run it
