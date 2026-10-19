@@ -29,8 +29,9 @@ On GitHub, open https://github.com/jky-sh/f95-app and press **Fork** (top right)
 
 ```powershell
 cd $HOME\Documents
-git clone https://github.com/<you>/f95-app.git
+git clone https://github.com/GoldHed/f95-app.git
 cd f95-app
+git checkout organized-library
 ```
 
 ## 3. Apply the changes
@@ -51,7 +52,13 @@ git push -u origin organized-library
 npm install
 npm --prefix src-tauri/sidecar install
 npm --prefix src-tauri/sidecar run build
+npm --prefix src-tauri/sidecar run build:bundle
+npm --prefix src-tauri/sidecar run build:sea
 ```
+
+The last two package the helper program the app runs alongside itself (they create `src-tauri\sidecar\dist\`). Without them, `npm run tauri dev` stops with "resource path `sidecar\dist\…` doesn't exist".
+
+If PowerShell says "running scripts is disabled on this system", run `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` once, or use `npm.cmd` instead of `npm`.
 
 ## 5. Run it
 
