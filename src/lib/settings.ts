@@ -22,6 +22,8 @@ export const KEY_DL_SPEED_MBPS = 'dl_speed_mbps';
 export const KEY_DL_DELETE_ARCHIVE = 'dl_delete_archive';
 export const KEY_DL_CREATE_SHORTCUTS = 'dl_create_shortcuts';
 export const KEY_DL_KEEP_OLD_VERSIONS = 'dl_keep_old_versions';
+export const KEY_DL_ORGANIZE_LAYOUT = 'dl_organize_layout';
+export const KEY_DL_AUTO_UPDATE = 'dl_auto_update';
 
 export const KEY_DEV_DEBUG_PANEL = 'dev_debug_panel';
 export const KEY_DEV_DEBUG_LAYOUT = 'dev_debug_layout';

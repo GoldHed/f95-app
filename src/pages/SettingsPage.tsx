@@ -1151,6 +1151,22 @@ export function SettingsPage({ onLoggedOut: _onLoggedOut }: Props) {
                   />
                   <span>{t('settings.downloads.keepOldVersions')}</span>
                 </label>
+                <label className="settings-check-row" title={t('settings.downloads.organizeLayout.hint')}>
+                  <input
+                    type="checkbox"
+                    checked={dlSettings.organizeLayout}
+                    onChange={(e) => updateDlSettings({ organizeLayout: e.target.checked })}
+                  />
+                  <span>{t('settings.downloads.organizeLayout')}</span>
+                </label>
+                <label className="settings-check-row" title={t('settings.downloads.autoUpdate.hint')}>
+                  <input
+                    type="checkbox"
+                    checked={dlSettings.autoDownloadUpdates}
+                    onChange={(e) => updateDlSettings({ autoDownloadUpdates: e.target.checked })}
+                  />
+                  <span>{t('settings.downloads.autoUpdate')}</span>
+                </label>
               </div>
             </div>
           </section>

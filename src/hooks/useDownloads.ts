@@ -8,6 +8,7 @@ import { engineLabel } from '../lib/installVersions';
 import * as ipc from '../lib/ipc';
 import { pathsOverlap } from '../lib/paths';
 import { loadDownloadSettings } from '../lib/downloadSettings';
+import { placeExtraction } from '../lib/organizedLayout';
 import {
   archiveParentDir,
   extractDirForArchive,
@@ -62,7 +63,8 @@ export async function runExtraction(
   if (!game) {
     throw new Error('Jogo não está na biblioteca');
   }
-  const previousInstallDir = game.installPath;
+  let previousInstallDir = game.installPath;
+  let previousExePath = game.exePath;
   const previousVersionLabel = game.currentVersion;
   const wasInstalled =
     game.installStatus === 'installed' || game.installStatus === 'update_available';
@@ -79,10 +81,39 @@ export async function runExtraction(
     });
     const cat = game.category ?? 'games';
     const mediaOnly = cat === 'comics' || cat === 'animations' || cat === 'assets';
+    const dlSettings = await loadDownloadSettings();
+
+    // Organized layout: the files go to <library>\<Game>\Current and the
+    // previous Current is renamed to its version. If that fails, the game
+    // stays playable where it was extracted.
+    let replacedCurrent = false;
+    if (dlSettings.organizeLayout) {
+      try {
+        const placed = await placeExtraction({
+          game,
+          archivePath,
+          extractedDir: result.destDir,
+          exePath: result.exePath,
+        });
+        result.destDir = placed.destDir;
+        result.exePath = placed.exePath;
+        previousInstallDir = placed.previousDir;
+        previousExePath = placed.previousExe;
+        replacedCurrent = placed.archivedDir !== null;
+      } catch (err) {
+        console.warn('[organize] could not move the install into Current', err);
+        await dialog.alert(
+          tStandalone('organize.failed', { path: result.destDir, error: formatError(err) }),
+          { kind: 'warning' },
+        );
+      }
+    }
+
     // Re-extracting into the same folder (older rows pointed at the exe's
     // subfolder of it) is not an update: nothing to keep, migrate or delete.
     const isUpdate =
-      wasInstalled && !!previousInstallDir && !pathsOverlap(previousInstallDir, result.destDir);
+      replacedCurrent ||
+      (wasInstalled && !!previousInstallDir && !pathsOverlap(previousInstallDir, result.destDir));
 
     // Garante que a instalação ANTERIOR tenha registro de versão antes de a
     // linha do jogo apontar para a nova — senão o rótulo/exe dela se perdem.
@@ -92,7 +123,7 @@ export async function runExtraction(
           threadId,
           version: previousVersionLabel,
           installPath: previousInstallDir,
-          exePath: game.exePath,
+          exePath: previousExePath,
           engine: null,
           sizeBytes: null,
         });
@@ -129,10 +160,11 @@ export async function runExtraction(
       console.warn('[extract] failed to register install version', err);
     }
 
-    const dlSettings = await loadDownloadSettings();
     if (dlSettings.deleteArchiveAfterExtract) {
       try {
         await ipc.deletePath(archivePath);
+        // Organized: nothing else lives in the download's staging folder.
+        if (dlSettings.organizeLayout) await ipc.removeDirIfEmpty(archiveParentDir(archivePath));
       } catch (err) {
         console.warn('[extract] failed to delete archive', err);
       }
@@ -334,6 +366,12 @@ async function reconcilePendingExtractions(
   }
 }
 
+/** Auto-extractions running / finished in this session, across hook instances. */
+const EXTRACTING = new Set<string>();
+const EXTRACTED = new Map<string, number>();
+/** Other instances' copies of the same event arrive within moments. */
+const DUPLICATE_WINDOW_MS = 60_000;
+
 export function useDownloads(options?: UseDownloadsOptions): {
   rows: DownloadRow[];
   progress: Record<number, DownloadProgress>;
@@ -383,10 +421,18 @@ export function useDownloads(options?: UseDownloadsOptions): {
       gameVersion?: string | null,
     ): Promise<void> {
       const key = `${threadId}:${archivePath}`;
-      if (extractingRef.current.has(key)) return;
+      // Several components mount this hook and each hears `download:done`;
+      // the module-level sets make one of them extract, once. (A second run
+      // would re-extract over the new install, and with the organized
+      // layout archive it as an "old" version.)
+      const doneAt = EXTRACTED.get(key);
+      if (doneAt !== undefined && Date.now() - doneAt < DUPLICATE_WINDOW_MS) return;
+      if (extractingRef.current.has(key) || EXTRACTING.has(key)) return;
       extractingRef.current.add(key);
+      EXTRACTING.add(key);
       try {
         await runExtraction(threadId, archivePath, gameVersion);
+        EXTRACTED.set(key, Date.now());
       } catch (err) {
         console.error('[extract] auto failed', err);
         await dialog.alert(
@@ -395,6 +441,7 @@ export function useDownloads(options?: UseDownloadsOptions): {
         );
       } finally {
         extractingRef.current.delete(key);
+        EXTRACTING.delete(key);
       }
     }
 

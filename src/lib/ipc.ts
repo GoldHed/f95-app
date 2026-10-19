@@ -265,6 +265,68 @@ export async function probeInstallDir(path: string): Promise<InstallDirProbe> {
   return invoke<InstallDirProbe>('probe_install_dir', { path });
 }
 
+export interface OrganizeResult {
+  /** `<game>\Current`, now holding the new version. */
+  currentDir: string;
+  /** Where the previous `Current` was moved (its version folder), if any. */
+  archivedDir: string | null;
+  /** The new version's exe inside `Current`. */
+  exePath: string | null;
+}
+
+/** Move a fresh extraction into `<gameDir>\Current`, archiving the old one. */
+export async function organizeInstall(args: {
+  gameDir: string;
+  extractedDir: string;
+  previousVersion: string | null;
+  exePath: string | null;
+  today: string;
+}): Promise<OrganizeResult> {
+  return invoke<OrganizeResult>('organize_install', args);
+}
+
+export interface AdoptResult {
+  currentDir: string;
+  exePath: string | null;
+  engine: string | null;
+  sizeBytes: number;
+}
+
+/** Bring an existing game folder in (optionally moving its files into `Current`). */
+export async function adoptGameFolder(args: {
+  gameDir: string;
+  gameTitle: string;
+  reorganize: boolean;
+}): Promise<AdoptResult> {
+  return invoke<AdoptResult>('adopt_game_folder', args);
+}
+
+export interface GameFolderEntry {
+  name: string;
+  path: string;
+  hasCurrent: boolean;
+  versionFolders: string[];
+}
+
+/** Sub-folders of `root`, one per game. */
+export async function listGameFolders(root: string): Promise<GameFolderEntry[]> {
+  return invoke<GameFolderEntry[]>('list_game_folders', { root });
+}
+
+/** `<library>\<Game>` for an organized install, else null. */
+export async function organizedGameDir(installPath: string): Promise<string | null> {
+  return invoke<string | null>('organized_game_dir', { installPath });
+}
+
+/** Windows-safe folder name for a game title. */
+export async function gameFolderName(title: string): Promise<string> {
+  return invoke<string>('game_folder_name', { title });
+}
+
+export async function removeDirIfEmpty(path: string): Promise<boolean> {
+  return invoke<boolean>('remove_dir_if_empty', { path });
+}
+
 export async function deletePath(path: string): Promise<void> {
   return invoke('delete_path', { path });
 }

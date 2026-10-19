@@ -91,6 +91,11 @@ async function versionRows(threadId: string): Promise<DbRow[]> {
   );
 }
 
+/** Registered versions as stored, newest first (no seeding or pruning). */
+export async function listRows(threadId: string): Promise<InstallVersion[]> {
+  return (await versionRows(threadId)).map((r) => rowToVersion(r, null));
+}
+
 /** Disk used by every registered version of the game (bytes), or null if unknown. */
 export async function totalSize(threadId: string): Promise<number | null> {
   const rows = await query<{ total: number | null }>(
@@ -279,6 +284,27 @@ export async function setActive(
 /** Atualiza o exe registrado de uma versão (usuário escolheu manualmente). */
 export async function setVersionExe(id: number, exePath: string): Promise<void> {
   await execute(`UPDATE install_versions SET exe_path = ? WHERE id = ?`, [exePath, id]);
+}
+
+/**
+ * A version's folder was moved on disk (the organized layout renames
+ * `Current` to its version label on update): point its row, and an exe
+ * inside it, at the new place.
+ */
+export async function relocate(threadId: string, oldPath: string, newPath: string): Promise<void> {
+  const rows = await versionRows(threadId);
+  for (const r of rows) {
+    if (!samePath(r.install_path, oldPath)) continue;
+    const exe =
+      r.exe_path && isPathInside(r.exe_path, oldPath)
+        ? newPath + r.exe_path.slice(oldPath.replace(/[/\\]+$/, '').length)
+        : r.exe_path;
+    await execute(`UPDATE install_versions SET install_path = ?, exe_path = ? WHERE id = ?`, [
+      newPath,
+      exe,
+      r.id,
+    ]);
+  }
 }
 
 /** Remove só o registro (sem tocar no disco). */

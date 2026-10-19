@@ -84,7 +84,7 @@ pub async fn extract_archive(
 }
 
 /// Soma rasa do tamanho em disco de um diretório (bytes lógicos dos arquivos).
-fn dir_size_of(root: &std::path::Path) -> u64 {
+pub(crate) fn dir_size_of(root: &std::path::Path) -> u64 {
     let mut total = 0u64;
     for entry in walkdir::WalkDir::new(root).into_iter().flatten() {
         if entry.file_type().is_file() {

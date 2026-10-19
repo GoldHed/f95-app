@@ -16,6 +16,7 @@ mod media_scan;
 mod mega;
 mod migrations;
 mod mover;
+mod organize;
 mod overlay_anchor;
 mod overlay_hotkey;
 mod remote_image_preview;
@@ -221,6 +222,12 @@ pub fn run() {
             download_cancel,
             extract_archive,
             probe_install_dir,
+            commands::organize_install,
+            commands::adopt_game_folder,
+            commands::list_game_folders,
+            commands::organized_game_dir,
+            commands::game_folder_name,
+            commands::remove_dir_if_empty,
             scan_install_media,
             resolve_media_preview,
             resolve_remote_image_preview,

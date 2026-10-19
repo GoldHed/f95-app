@@ -4,6 +4,7 @@ import * as library from './library';
 import * as settings from './settings';
 import { announceGameUpdates, type FoundGameUpdate } from './updateNotifier';
 import { applyLatestVersion, checkAll } from './updates';
+import { queueAutoUpdates } from './autoUpdate';
 import type { LibraryGame } from '../types/library';
 
 /**
@@ -179,6 +180,8 @@ async function run(options: RunOptions, signal: AbortSignal): Promise<void> {
   // Every game's thread was read: nothing is left over from a capped run.
   if (!options.background && !window) await settings.remove(KEY_UPDATES_FULL_PENDING);
   setState({ checkedAt: startedAt, found: tally.found, foundNew: tally.fresh.length });
+  // With "download updates automatically" on, fetch what was found.
+  await queueAutoUpdates().catch((err) => console.warn('[update-check] auto-update failed', err));
 }
 
 interface Tally {

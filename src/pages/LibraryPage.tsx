@@ -16,6 +16,7 @@ import { GameCardGridSkeleton } from '../components/ui/GameCardSkeleton';
 import { useLibraryGameActions } from '../hooks/useLibraryGameActions';
 import { useDownloadsByThread } from '../hooks/useDownloadsByThread';
 import { UpdateCheckControl } from '../components/library/UpdateCheckControl';
+import { ImportFoldersModal } from '../components/library/ImportFoldersModal';
 import { useSkin } from '../hooks/useSkin';
 import { useLibraryView } from '../hooks/useLibraryView';
 import { useT } from '../lib/i18n';
@@ -65,6 +66,7 @@ const SEARCH_DEBOUNCE_MS = 200;
 
 export function LibraryPage() {
   const { t } = useT();
+  const [importOpen, setImportOpen] = useState(false);
   // Steam skin: LibraryLayout mounts the game-list panel (with its own
   // search) on the left, so this page hides its standalone search input.
   const steamMode = useSkin() === 'steam';
@@ -271,8 +273,17 @@ export function LibraryPage() {
         <span className="lib-head-spacer" />
         {/* Shared with News; runs in the background too. Results arrive as
             library changes, which this page already follows. */}
+        <button
+          type="button"
+          className="ui-btn ui-btn--secondary ui-btn--sm"
+          onClick={() => setImportOpen(true)}
+          title={t('import.button.hint')}
+        >
+          {t('import.button')}
+        </button>
         <UpdateCheckControl onShowUpdates={() => updateQuery({ status: 'update_available' })} />
       </header>
+      <ImportFoldersModal open={importOpen} onClose={() => setImportOpen(false)} />
 
       <LibraryCategoryBar category={category} onCategory={setCategory} />
 

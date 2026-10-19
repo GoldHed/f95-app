@@ -180,6 +180,34 @@ const en: Record<string, string> = {
   'library.search': 'Search the library…',
   'library.checkUpdates': 'Check for updates',
   'library.checking': 'Checking {done}/{total}…',
+
+  // ─── Import existing game folders ──────────────────────────────────────
+  'import.button': 'Import folders',
+  'import.button.hint': 'Add games already on your drive (one folder per game)',
+  'import.title': 'Import games from a folder',
+  'import.intro':
+    'Pick the folder that holds your games, one sub-folder per game (for example E:\\Games). Each folder is looked up on F95Zone so the app can check it for updates. Nothing is moved until you confirm.',
+  'import.pick': 'Choose folder…',
+  'import.scanning': 'Looking up games on F95Zone… {done}/{total}',
+  'import.review':
+    'Check each match and type the version you have installed. Leave the version empty if you do not know it; the game will then show as having an update.',
+  'import.col.folder': 'Folder',
+  'import.col.match': 'F95Zone game',
+  'import.col.version': 'Installed version',
+  'import.already': 'Already in your library',
+  'import.hasCurrent': 'Already organized (has a Current folder)',
+  'import.noMatch': 'No match found. Try a different search.',
+  'import.searchAgain': 'Search',
+  'import.versionUnknown': 'Unknown',
+  'import.useLatest': 'I have {version}',
+  'import.useLatest.hint': 'Use the latest version on F95Zone',
+  'import.reorganize':
+    'Move each game\'s files into a "Current" sub-folder (folders that already have one are left as they are)',
+  'import.run': 'Import {count}',
+  'import.importing': 'Importing… {done}/{total}',
+  'import.done': 'Imported {count}.',
+  'organize.failed':
+    'The new version could not be moved into the game\'s Current folder ({error}). It is installed at {path} instead.',
   'updates.progress.catalog': 'Reading F95\'s latest updates {done}/{total}…',
   'updates.progress.starting': 'Checking…',
   'updates.status.checked': 'Checked {when}',
@@ -410,6 +438,13 @@ const en: Record<string, string> = {
     'Keep the previous install when updating (allows version rollback)',
   'settings.downloads.keepOldVersions.hint':
     'Each update sits alongside the previous one. Delete old versions from the game page to free disk space.',
+  'settings.downloads.organizeLayout':
+    'Organize installs as "Game Name\\Current", with old versions in folders named after their version',
+  'settings.downloads.organizeLayout.hint':
+    'After an update, the old Current folder is renamed to its version (e.g. "v0.5.1") and the new version goes into Current.',
+  'settings.downloads.autoUpdate': 'Download updates automatically after each update check',
+  'settings.downloads.autoUpdate.hint':
+    'Uses the Windows link from the hosts the app can download from. Hosts that need a quick verification wait for you in Downloads.',
 
   'settings.hosts.section': 'Download hosts',
   'settings.hosts.hint': 'Some links restrict downloads to Premium accounts. Paste your credentials so the app can download using your account.',

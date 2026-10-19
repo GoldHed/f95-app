@@ -1,5 +1,6 @@
 import * as downloads from './downloads';
 import * as ipc from './ipc';
+import * as libraries from './libraries';
 import * as library from './library';
 import type { GameDownload } from '../types/game';
 import type { SamCategory } from '../types/sam';
@@ -23,6 +24,16 @@ export async function startGameDownload(
   download: GameDownload,
   libraryPath?: string,
 ): Promise<void> {
+  // An update with no library chosen goes to the library the game is
+  // already installed in, so the new version lands next to the old one
+  // (and on the same drive, where moving it into Current is instant).
+  if (!libraryPath) {
+    const existing = await library.get(game.threadId);
+    const lib = existing?.installPath
+      ? await libraries.findContaining(existing.installPath).catch(() => null)
+      : null;
+    if (lib) libraryPath = lib.path;
+  }
   await library.add({
     threadId: game.threadId,
     category: game.category,

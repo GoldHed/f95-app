@@ -8,6 +8,13 @@ export interface DownloadSettings {
   createShortcuts: boolean;
   /** Atualizar mantém a instalação anterior como versão alternável (rollback). */
   keepOldVersions: boolean;
+  /**
+   * Install into `<library>\<Game Name>\Current`; on update the previous
+   * `Current` is renamed to its version (`<Game Name>\v0.5.1`).
+   */
+  organizeLayout: boolean;
+  /** Queue a download as soon as an update check finds a new version. */
+  autoDownloadUpdates: boolean;
 }
 
 export const DEFAULT_DOWNLOAD_SETTINGS: DownloadSettings = {
@@ -16,11 +23,20 @@ export const DEFAULT_DOWNLOAD_SETTINGS: DownloadSettings = {
   deleteArchiveAfterExtract: false,
   createShortcuts: true,
   keepOldVersions: true,
+  organizeLayout: true,
+  autoDownloadUpdates: false,
 };
 
 export async function loadDownloadSettings(): Promise<DownloadSettings> {
-  const [autoExtract, speedInMbps, deleteArchiveAfterExtract, createShortcuts, keepOldVersions] =
-    await Promise.all([
+  const [
+    autoExtract,
+    speedInMbps,
+    deleteArchiveAfterExtract,
+    createShortcuts,
+    keepOldVersions,
+    organizeLayout,
+    autoDownloadUpdates,
+  ] = await Promise.all([
       settings.getBool(settings.KEY_DL_AUTO_EXTRACT, DEFAULT_DOWNLOAD_SETTINGS.autoExtract),
       settings.getBool(settings.KEY_DL_SPEED_MBPS, DEFAULT_DOWNLOAD_SETTINGS.speedInMbps),
       settings.getBool(
@@ -35,8 +51,24 @@ export async function loadDownloadSettings(): Promise<DownloadSettings> {
         settings.KEY_DL_KEEP_OLD_VERSIONS,
         DEFAULT_DOWNLOAD_SETTINGS.keepOldVersions,
       ),
+      settings.getBool(
+        settings.KEY_DL_ORGANIZE_LAYOUT,
+        DEFAULT_DOWNLOAD_SETTINGS.organizeLayout,
+      ),
+      settings.getBool(
+        settings.KEY_DL_AUTO_UPDATE,
+        DEFAULT_DOWNLOAD_SETTINGS.autoDownloadUpdates,
+      ),
     ]);
-  return { autoExtract, speedInMbps, deleteArchiveAfterExtract, createShortcuts, keepOldVersions };
+  return {
+    autoExtract,
+    speedInMbps,
+    deleteArchiveAfterExtract,
+    createShortcuts,
+    keepOldVersions,
+    organizeLayout,
+    autoDownloadUpdates,
+  };
 }
 
 export async function saveDownloadSettings(
@@ -50,6 +82,8 @@ export async function saveDownloadSettings(
     settings.setBool(settings.KEY_DL_DELETE_ARCHIVE, next.deleteArchiveAfterExtract),
     settings.setBool(settings.KEY_DL_CREATE_SHORTCUTS, next.createShortcuts),
     settings.setBool(settings.KEY_DL_KEEP_OLD_VERSIONS, next.keepOldVersions),
+    settings.setBool(settings.KEY_DL_ORGANIZE_LAYOUT, next.organizeLayout),
+    settings.setBool(settings.KEY_DL_AUTO_UPDATE, next.autoDownloadUpdates),
   ]);
   return next;
 }
